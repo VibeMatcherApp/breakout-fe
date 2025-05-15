@@ -203,15 +203,10 @@ export const AssetChart: React.FC<AssetChartProps> = ({ assets, walletAddress, m
   return (
     <div className="h-[220px] flex flex-col items-center justify-between">
       {matchPercentage !== undefined ? (
-        // If there is match percentage, only show match percentage, not donut chart
-        <div className="relative w-[180px] h-[180px] mx-auto">
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-base text-neutral whitespace-nowrap">Match percentage</span>
-            <span className="text-purple font-bold text-4xl mt-2">{matchPercentage}%</span>
-          </div>
-        </div>
+        // 如果有 matchPercentage，顯示空容器以保持高度
+        <div className="relative w-[180px] h-[180px] mx-auto" />
       ) : (
-          // Otherwise, show asset donut chart
+          // 否則顯示資產圓環圖
         <>
           <div className="relative w-[220px] h-[220px] mx-auto">
             <svg
@@ -243,8 +238,7 @@ export const AssetChart: React.FC<AssetChartProps> = ({ assets, walletAddress, m
                       className="w-3 h-3 rounded-full mr-1 flex-shrink-0"
                       style={{ backgroundColor: segment.color }}
                     />
-                    <span className="mr-1">{categoryFullNames[segment.category] || segment.category}</span>
-                    <span className="ml-auto text-gray-500">{segment.percentage}%</span>
+                    <span className="text-white/80">{categoryFullNames[segment.category] || segment.category}</span>
                   </div>
                 ))}
               </div>

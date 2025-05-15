@@ -95,7 +95,7 @@ export const CardStack: React.FC<CardStackProps> = () => {
         )}
       </AnimatePresence>
 
-      <div className="flex-1 relative flex items-center justify-center mb-24">
+      <div className="flex-1 relative flex items-center justify-center">
         <AnimatePresence>
           {potentialMatches.slice(currentIndex, currentIndex + 3).map((match, index) => (
             <motion.div
@@ -128,12 +128,14 @@ export const CardStack: React.FC<CardStackProps> = () => {
         </AnimatePresence>
       </div>
 
-      <div className="relative w-full max-w-md mx-auto mt-4 mb-8">
-        <SwipeControls
-          onSwipeLeft={() => handleSwipe('left')}
-          onSwipeRight={() => handleSwipe('right')}
-        />
-      </div>
+      {!showMatchAnimation && (
+        <div className="absolute -bottom-16 left-0 right-0 w-full max-w-md mx-auto">
+          <SwipeControls
+            onSwipeLeft={() => handleSwipe('left')}
+            onSwipeRight={() => handleSwipe('right')}
+          />
+        </div>
+      )}
     </div>
   );
 };
