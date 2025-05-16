@@ -153,125 +153,119 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
   const getMatchColor = (percentage: number) => {
     if (percentage >= 90) return 'from-teal-500 to-emerald-400';
     if (percentage >= 70) return 'from-emerald-500 to-green-400';
-    if (percentage >= 50) return 'from-yellow-500 to-orange-400';
+    if (percentage >= 50) return 'from-violet-500 to-purple-400';
     return 'from-gray-500 to-gray-400';
   };
 
   return (
     <motion.div
-      className={`relative bg-gradient-to-br from-gray-900 to-black rounded-2xl shadow-lg overflow-hidden ${isProfileView ? 'cursor-pointer hover:shadow-xl' : ''} transition-all duration-300 [perspective:1000px]`}
+      className={`relative bg-gradient-to-br from-[#001d25] to-black rounded-2xl shadow-lg overflow-hidden ${isProfileView ? 'cursor-pointer hover:shadow-xl' : ''} transition-all duration-300 [perspective:1000px]`}
       onClick={toggleView}
       onMouseEnter={() => isProfileView && setIsHovered(true)}
       onMouseLeave={() => isProfileView && setIsHovered(false)}
       whileHover={isProfileView ? { scale: 1.02 } : undefined}
       transition={{ type: "spring", stiffness: 300, damping: 15 }}
     >
-      {isProfileView && isLoading && !showQRCode ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10 rounded-2xl">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        </div>
-      ) : null}
-
-      <div className="relative h-[400px]">
-        {/* Match Percentage Display */}
-        {isDiscoverView && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className={`text-8xl font-bold bg-gradient-to-r ${getMatchColor(displayMatchPercentage)} bg-clip-text text-transparent animate-fade-in`}>
-              {displayMatchPercentage}%
+      <div className={`relative h-[400px] transition-transform duration-500 [transform-style:preserve-3d] ${showQRCode ? '[transform:rotateY(180deg)]' : ''}`}>
+        {/* Front side */}
+        <div className="absolute inset-0 [backface-visibility:hidden]">
+          {isProfileView && isLoading && !showQRCode ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10 rounded-2xl">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
             </div>
-            <div className="text-gray-400 mt-2 text-lg">Match Score</div>
-          </div>
-        )}
+          ) : null}
 
-        {/* Asset Chart */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-[80%] h-[80%]">
-            <AssetChart
-              assets={displayAssets}
-              walletAddress={userData?.wallet_address}
-              matchPercentage={isDiscoverView ? displayMatchPercentage : undefined}
-            />
-          </div>
-        </div>
+          <div className="relative h-[400px]">
+            {/* Match Percentage Display */}
+            {isDiscoverView && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className={`text-8xl font-bold bg-gradient-to-r ${getMatchColor(displayMatchPercentage)} bg-clip-text text-transparent animate-fade-in`}>
+                  {displayMatchPercentage}%
+                </div>
+                <div className="text-gray-400 mt-2 text-lg">Match Score</div>
+              </div>
+            )}
 
-        {/* User Info */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent">
-          <div className="flex items-center mb-3">
-            <h2 className="text-2xl font-semibold text-white mr-2">{displayUser.displayName}</h2>
-          </div>
+            {/* Asset Chart */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-[80%] h-[80%]">
+                <AssetChart
+                  assets={displayAssets}
+                  walletAddress={userData?.wallet_address}
+                  matchPercentage={isDiscoverView ? displayMatchPercentage : undefined}
+                />
+              </div>
+            </div>
 
-          {/* Tags */}
-          {isDiscoverView && displayTags && (
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(displayTags).map(([key, value]) =>
-                value && (
-                  <span
-                    key={key}
-                    className="px-3 py-1 rounded-full text-sm bg-white/10 text-white/80 backdrop-blur-sm"
-                  >
-                    #{value}
-                  </span>
-                )
+            {/* User Info */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent">
+              <div className="flex items-center mb-3">
+                <h2 className="text-2xl font-semibold text-white mr-2">{displayUser.displayName}</h2>
+              </div>
+
+              {/* Tags */}
+              {isDiscoverView && displayTags && (
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(displayTags).map(([key, value]) =>
+                    value && (
+                      <span
+                        key={key}
+                        className="px-3 py-1 rounded-full text-sm bg-white/10 text-white/80 backdrop-blur-sm"
+                      >
+                        #{value}
+                      </span>
+                    )
+                  )}
+                </div>
               )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
 
-      {/* QR Code View */}
-      <AnimatePresence initial={false} mode="wait">
-        {showQRCode && (
-          <motion.div
-            key="qrcode"
-            className="absolute inset-0 bg-black/95 rounded-xl shadow-sm [backface-visibility:hidden]"
-            initial={{ rotateY: 90, opacity: 0, scale: 0.95 }}
-            animate={{ rotateY: 0, opacity: 1, scale: 1 }}
-            exit={{ rotateY: -90, opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-          >
-            <div className="flex flex-col items-center justify-center py-4 h-full">
-              {isLoading ? (
-                <div className="h-64 flex items-center justify-center">
-                  <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        {/* Back side */}
+        <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-black/95 rounded-xl">
+          <div className="flex flex-col items-center justify-center py-4 h-full">
+            {isLoading ? (
+              <div className="h-64 flex items-center justify-center">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              </div>
+            ) : userData ? (
+              <div className="flex flex-col items-center space-y-4">
+                <div className="bg-white p-4 rounded-lg shadow-md border border-gray-100">
+                  <QRCodeSVG
+                    value={userData.wallet_address || walletAddress}
+                    size={200}
+                    bgColor={"#ffffff"}
+                    fgColor={"#000000"}
+                    level={"L"}
+                    includeMargin={false}
+                  />
                 </div>
-              ) : userData ? (
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="bg-white p-4 rounded-lg shadow-md border border-gray-100">
+                <div className="text-center">
+                  <p className="text-sm text-gray-400 mb-1">Scan this QR Code to add as a friend</p>
+                </div>
+              </div>
+            ) : (
+              <div className="h-64 flex flex-col items-center justify-center">
+                <p className="text-gray-400 mb-2">Cannot get user data</p>
+                {walletAddress && (
+                  <div className="bg-white p-4 rounded-lg shadow mt-4">
                     <QRCodeSVG
-                      value={userData.wallet_address || walletAddress}
+                      value={walletAddress}
                       size={200}
                       bgColor={"#ffffff"}
                       fgColor={"#000000"}
                       level={"L"}
                       includeMargin={false}
                     />
+                    <p className="text-xs text-gray-400 mt-3 text-center">Use wallet address as a backup</p>
                   </div>
-                  <div className="text-center">
-                      <p className="text-sm text-gray-400 mb-1">Scan this QR Code to add as a friend</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-64 flex flex-col items-center justify-center">
-                      <p className="text-gray-400 mb-2">Cannot get user data</p>
-                      {walletAddress && (
-                        <div className="bg-white p-4 rounded-lg shadow mt-4">
-                          <QRCodeSVG
-                            value={walletAddress}
-                            size={200}
-                            bgColor={"#ffffff"}
-                            fgColor={"#000000"}
-                            level={"L"}
-                            includeMargin={false}
-                          />
-                      <p className="text-xs text-gray-400 mt-3 text-center">Use wallet address as a backup</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </motion.div>
   );
 };

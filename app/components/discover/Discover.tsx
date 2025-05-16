@@ -837,52 +837,61 @@ export const Discover = () => {
                 );
             case 'profile':
                 return (
-                    <div className="max-w-2xl mx-auto">
-                        <div className="flex justify-end mb-4">
-                            {/* Logout button moved to sidebar */}
+                    <div className="relative min-h-[calc(100vh-120px)] flex flex-col">
+                        <div className="flex-1 relative flex items-center justify-center">
+                            <div className="absolute max-w-md w-full mx-auto left-0 right-0">
+                                <ProfileCard
+                                    user={{
+                                        id: 0,
+                                        username: 'user',
+                                        displayName: 'User',
+                                        avatarInitials: 'U',
+                                        activeStatus: 'online',
+                                        reputation: 4.5
+                                    }}
+                                    assets={[]}
+                                    preferences={{
+                                        wantedTokens: [],
+                                        offeredTokens: []
+                                    }}
+                                    matchPercentage={100}
+                                />
+                            </div>
                         </div>
-                        <ProfileCard
-                            user={{
-                                id: 0,
-                                username: 'user',
-                                displayName: 'User',
-                                avatarInitials: 'U',
-                                activeStatus: 'online',
-                                reputation: 4.5
-                            }}
-                            assets={[]}
-                            preferences={{
-                                wantedTokens: [],
-                                offeredTokens: []
-                            }}
-                            matchPercentage={100}
-                        />
 
-                        <div className="flex flex-col items-center gap-4 mt-6">
-                            <Button
-                                className="w-16 h-16 rounded-full border-4 border-[#4287f5] bg-[#4287f5] hover:bg-[#4287f5]/90 text-white flex items-center justify-center"
-                                onClick={handleScan}
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <path d="M3 7V5a2 2 0 0 1 2-2h2" />
-                                    <path d="M17 3h2a2 2 0 0 1 2 2v2" />
-                                    <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
-                                    <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
-                                    <line x1="7" y1="12" x2="17" y2="12" />
-                                </svg>
-                            </Button>
-                            <p className="text-sm text-gray-500">Click to scan other users' QR codes to add friends</p>
-                        </div>
+                        {!isScanning && (
+                            <div className="absolute -bottom-16 left-0 right-0 w-full max-w-md mx-auto">
+                                <div className="flex flex-col items-center">
+                                    <p className="text-sm text-gray-500">
+                                        Click to scan other users' QR codes
+                                    </p>
+                                    <div className="flex justify-center gap-8 mt-4 mb-20 md:mb-4 z-[60] relative">
+                                        <Button
+                                            className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-900 to-black text-white/80 flex items-center justify-center shadow-xl"
+                                            onClick={handleScan}
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="24"
+                                                height="24"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+                                                <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+                                                <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+                                                <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                                                <line x1="7" y1="12" x2="17" y2="12" />
+                                            </svg>
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {isScanning && (
                             <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
@@ -1056,8 +1065,10 @@ export const Discover = () => {
         }
     };
 
+    const isTabPage = view === 'matches' || view === 'nft';
+
     return (
-        <div className="flex-1 p-4">
+        <div className={isTabPage ? 'pt-32' : ''}>
             {renderContent()}
         </div>
     );

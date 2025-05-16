@@ -38,9 +38,9 @@ const SwipeControls: React.FC<SwipeControlsProps> = ({ onSwipeLeft, onSwipeRight
     <div className="flex justify-center gap-8 mt-4 mb-20 md:mb-4 z-[60] relative">
       <motion.button
         onClick={handleSwipeLeft}
-        className="w-16 h-16 flex items-center justify-center bg-red-500 text-white rounded-full shadow-xl"
+        className="w-16 h-16 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black text-white/80 rounded-full shadow-xl hover:bg-white/10"
         whileTap={{ scale: 0.9 }}
-        whileHover={{ scale: 1.1, boxShadow: "0 10px 25px -5px rgba(239, 68, 68, 0.5)" }}
+        whileHover={{ scale: 1.05 }}
         disabled={disableControls}
         style={{
           transition: "all 0.2s ease"
@@ -51,9 +51,9 @@ const SwipeControls: React.FC<SwipeControlsProps> = ({ onSwipeLeft, onSwipeRight
 
       <motion.button
         onClick={handleSwipeRight}
-        className="w-16 h-16 flex items-center justify-center bg-emerald-500 text-white rounded-full shadow-xl"
+        className="w-16 h-16 flex items-center justify-center bg-gradient-to-r from-teal-500 to-emerald-400 text-white rounded-full shadow-xl hover:opacity-90"
         whileTap={{ scale: 0.9 }}
-        whileHover={{ scale: 1.1, boxShadow: "0 10px 25px -5px rgba(16, 185, 129, 0.5)" }}
+        whileHover={{ scale: 1.05 }}
         disabled={disableControls}
         style={{
           transition: "all 0.2s ease"
