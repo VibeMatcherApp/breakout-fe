@@ -8,11 +8,13 @@ import { Button } from '@/components/ui/button';
 import { useWallet } from '@/context/WalletContext';
 import { useToast } from '@/hooks/use-toast';
 import { disconnectMetaMask } from '@/lib/wallet';
+import { usePrivy } from "@privy-io/react-auth";
 
 export const Sidebar = () => {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const { logout: privyLogout } = usePrivy();
     const currentView = searchParams.get('view') || 'discover';
     const { isAuthenticated, logout } = useAuth();
     const { setWalletAddress, setConnected } = useWallet();
@@ -34,37 +36,18 @@ export const Sidebar = () => {
 
     const handleLogout = async () => {
         try {
-            // Clear Auth state
-            logout();
-
-            // Clear Wallet state
-            setWalletAddress('');
-            setConnected(false);
-
-            // Try to disconnect MetaMask
-            await disconnectMetaMask();
-
-            // Show simple logout toast
-            showToast("Logged out", "You have successfully logged out", "default");
-
-            // Remove all possible auto-login items
-            localStorage.removeItem('userId');
-
-            // Mark logout status to ensure no auto-login after logout
-            sessionStorage.setItem('user_logged_out', 'true');
-            localStorage.setItem('walletconnected', 'false');
-            localStorage.setItem('force_disconnect', 'true');
-
-            // Delay to ensure toast is shown before page refresh
-            setTimeout(() => {
-                // Force refresh page to ensure all states are reset
-                window.location.href = '/';
-            }, 100);
-        } catch (error) {
-            console.error('Logout process error:', error);
-            showToast("Logout error", "An error occurred during logout, please try again", "destructive");
+            await privyLogout();
+    
+            localStorage.removeItem("user_logged_out");
+            localStorage.removeItem("walletconnected");
+    
+            window.location.href = "/";
+        } catch (err) {
+            console.error("Logout failed:", err);
+            showToast("Logout error", "An error occurred during logout.", "destructive");
         }
     };
+    
 
     return (
         <>

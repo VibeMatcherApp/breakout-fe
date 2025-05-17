@@ -599,32 +599,50 @@ export function WalletGatekeeper({ children }: WalletGatekeeperProps) {
   }, [ready, authenticated, walletAddress, router]);
 
   // 處理註冊 nickname 流程
-  const handleRegister = async () => {
-    if (!nickname.trim()) return;
-    try {
-      setIsSubmitting(true);
-      const res = await fetch("http://43.207.147.137:3001/api/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          wallet_address: walletAddress,
-          nickname,
-        }),
-      });
+  const [errorMsg, setErrorMsg] = useState("");
 
-      const data = await res.json();
-      if (res.status === 200 || res.status === 201) {
-        console.log("✅ User registered:", data);
-        router.push("/?view=discover");
-      } else {
-        console.error("❌ Registration failed:", data);
-      }
-    } catch (err) {
-      console.error("❌ Registration error:", err);
-    } finally {
-      setIsSubmitting(false);
+const handleRegister = async () => {
+if (!nickname.trim()) {
+    setErrorMsg("Please enter a nickname.");
+    return;
+}
+
+try {
+    setIsSubmitting(true);
+    setErrorMsg(""); // 清除上一次錯誤訊息
+
+    const res = await fetch("http://43.207.147.137:3001/api/users", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+        wallet_address: walletAddress,
+        nickname,
+    }),
+    });
+
+    const raw = await res.text(); // 拿原始內容，防止 Object 問題
+    let data;
+
+    try {
+    data = JSON.parse(raw);
+    } catch {
+    data = { message: raw }; // 非 JSON 就直接包成 message
     }
-  };
+
+    if (res.status === 200 || res.status === 201) {
+    console.log("✅ User registered:", data);
+    router.push("/?view=discover");
+    } else {
+    console.error("❌ Registration failed:", data);
+    setErrorMsg(data.message || "Registration failed. Please try again.");
+    }
+} catch (err) {
+    console.error("❌ Registration error:", err);
+    setErrorMsg("Server error. Please try again later.");
+} finally {
+    setIsSubmitting(false);
+}
+};
 
   // 登入中 loading 畫面
   if (!ready) {

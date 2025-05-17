@@ -19,7 +19,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       config={{
         loginMethods: ["wallet", "email", "twitter"],
         appearance: {
-          walletChainType: "solana",
+          walletChainType: "solana-olny",
           walletList: ["phantom"],
           theme: "dark",
         },
