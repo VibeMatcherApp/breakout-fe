@@ -4,8 +4,8 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 
 interface AuthContextType {
     isAuthenticated: boolean;
-    userId: number | null;
-    login: (userId: number) => void;
+    userId: string | null;
+    login: (userId: string) => void;
     logout: () => void;
 }
 
@@ -15,20 +15,22 @@ export { AuthContext };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [userId, setUserId] = useState<number | null>(null);
+    const [userId, setUserId] = useState<string | null>(null);
 
     useEffect(() => {
-        const storedUserId = localStorage.getItem('userId');
-        if (storedUserId) {
-            setUserId(parseInt(storedUserId, 10));
-            setIsAuthenticated(true);
+        if (typeof window !== "undefined") {
+            const storedUserId = localStorage.getItem('userId');
+            if (storedUserId) {
+                setUserId(storedUserId);
+                setIsAuthenticated(true);
+            }
         }
     }, []);
 
-    const login = (userId: number) => {
+    const login = (userId: string) => {
         setUserId(userId);
         setIsAuthenticated(true);
-        localStorage.setItem('userId', userId.toString());
+        localStorage.setItem('userId', userId);
     };
 
     const logout = () => {

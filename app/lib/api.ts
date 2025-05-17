@@ -4,15 +4,20 @@ export const fetchPotentialMatches = async () => {
     try {
         const currentWalletAddress = localStorage.getItem('walletAddress');
         if (!currentWalletAddress) {
+            console.error('No wallet address found in localStorage');
             throw new Error('Current user wallet address not found');
         }
+
+        console.log('Fetching potential matches for wallet:', currentWalletAddress);
 
         // 1. Get all users list
         const allUsersResponse = await fetch('http://43.207.147.137:3001/api/users');
         if (!allUsersResponse.ok) {
+            console.error('Failed to fetch users list:', allUsersResponse.status);
             throw new Error('Unable to get user list');
         }
         const allUsers = await allUsersResponse.json();
+        console.log('Total users found:', allUsers.length);
 
         // 2. Get current user's friends list
         let friendsList: string[] = [];
@@ -25,25 +30,23 @@ export const fetchPotentialMatches = async () => {
                         friend.wallet_address || friend._id || friend
                     );
                 }
+                console.log('Friends list:', friendsList);
             }
         } catch (error) {
             console.error('Error getting friends list:', error);
         }
 
-        // Get matched users from API instead of relying on localStorage
+        // Get matched users from API
         let matchedUserIds: string[] = [];
         try {
             const matchesResponse = await fetch(`http://43.207.147.137:3001/api/users/${currentWalletAddress}/matches`);
             if (matchesResponse.ok) {
                 const matchesData = await matchesResponse.json();
                 matchedUserIds = matchesData.map((match: any) => match.user_id || match._id);
+                console.log('Matched users:', matchedUserIds);
             }
         } catch (error) {
-            console.error('Error getting matched users from API:', error);
-            // Fallback: still get from localStorage
-            const savedMatchesStr = localStorage.getItem('savedMatches');
-            const savedMatches = savedMatchesStr ? JSON.parse(savedMatchesStr) : [];
-            matchedUserIds = savedMatches.map((match: any) => match.user.id.toString());
+            console.error('Error getting matched users:', error);
         }
 
         // Filter out self, friends, and already matched users
@@ -55,55 +58,64 @@ export const fetchPotentialMatches = async () => {
             return isNotSelf && isNotFriend && isNotMatched;
         });
 
+        console.log('Filtered potential matches:', otherUsers.length);
+
         // 4. Build complete data for each user
         const potentialMatches = await Promise.all(
             otherUsers.map(async (user: any) => {
-                // Calculate match percentage
-                const matchResponse = await fetch(
-                    `http://43.207.147.137:3001/api/users/match?wallet1=${currentWalletAddress}&wallet2=${user.wallet_address}`
-                );
-                const matchData = matchResponse.ok ? await matchResponse.json() : { match_percentage: 70 };
+                try {
+                    // Calculate match percentage
+                    const matchResponse = await fetch(
+                        `http://43.207.147.137:3001/api/users/match?wallet1=${currentWalletAddress}&wallet2=${user.wallet_address}`
+                    );
+                    const matchData = matchResponse.ok ? await matchResponse.json() : { match_percentage: 70 };
 
-                // Get user details
-                const userDetailResponse = await fetch(
-                    `http://43.207.147.137:3001/api/users/${user.wallet_address}`
-                );
-                const userData = userDetailResponse.ok ? await userDetailResponse.json() : {};
+                    // Get user details
+                    const userDetailResponse = await fetch(
+                        `http://43.207.147.137:3001/api/users/${user.wallet_address}`
+                    );
+                    const userData = userDetailResponse.ok ? await userDetailResponse.json() : {};
 
-                // Build user data
-                return {
-                    user: {
-                        id: userData._id || user._id || Math.floor(Math.random() * 1000),
-                        displayName: userData.nickname || user.nickname || 'Anonymous User',
-                        avatarInitials: (userData.nickname || user.nickname || 'U')[0].toUpperCase(),
-                        activeStatus: "active",
-                        reputation: userData.reputation || 4.5,
-                        wallet_address: user.wallet_address
-                    },
-                    assets: userData.chain_data?.distribution ? 
-                        Object.entries(userData.chain_data.distribution).map(([symbol, value]) => ({
-                            symbol,
-                            balance: "0", // No balance information here, using 0
-                            value: String(value)
-                        })) : [
-                            { symbol: "ETH", balance: "0", value: "0" }
-                        ],
-                    preferences: {
-                        wantedTokens: userData.wanted_tokens || ['USDT', 'USDC'],
-                        offeredTokens: userData.offered_tokens || ['ETH', 'BTC']
-                    },
-                    matchPercentage: matchData.match_percentage || 70,
-                    tags: userData.tags || {
-                        blockchain: "Web3 User",
-                        assetType: "Crypto Holder"
-                    },
-                    walletAddress: user.wallet_address
-                };
+                    // Build user data
+                    return {
+                        user: {
+                            id: userData._id || user._id || Math.floor(Math.random() * 1000),
+                            displayName: userData.nickname || user.nickname || 'Anonymous User',
+                            avatarInitials: (userData.nickname || user.nickname || 'U')[0].toUpperCase(),
+                            activeStatus: "active",
+                            reputation: userData.reputation || 4.5,
+                            wallet_address: user.wallet_address
+                        },
+                        assets: userData.chain_data?.distribution ? 
+                            Object.entries(userData.chain_data.distribution).map(([symbol, value]) => ({
+                                symbol,
+                                balance: "0",
+                                value: String(value)
+                            })) : [
+                                { symbol: "ETH", balance: "0", value: "0" }
+                            ],
+                        preferences: {
+                            wantedTokens: userData.wanted_tokens || ['USDT', 'USDC'],
+                            offeredTokens: userData.offered_tokens || ['ETH', 'BTC']
+                        },
+                        matchPercentage: matchData.match_percentage || 70,
+                        tags: userData.tags || {
+                            blockchain: "Web3 User",
+                            assetType: "Crypto Holder"
+                        },
+                        walletAddress: user.wallet_address
+                    };
+                } catch (error) {
+                    console.error('Error processing user:', user.wallet_address, error);
+                    return null;
+                }
             })
         );
 
-        console.log('Retrieved potential matches:', potentialMatches);
-        return potentialMatches;
+        // Filter out any failed matches
+        const validMatches = potentialMatches.filter(match => match !== null);
+        console.log('Final potential matches:', validMatches.length);
+        return validMatches;
     } catch (error) {
         console.error('Error getting potential matches:', error);
         return [];
@@ -557,6 +569,48 @@ export const getWalletNFTs = async (walletAddress: string) => {
         ];
     } catch (error) {
         console.error('Error getting wallet NFTs:', error);
+        throw error;
+    }
+};
+
+// Get user profile
+export const fetchUserProfile = async (userId: string) => {
+    try {
+        const response = await fetch(`http://43.207.147.137:3001/api/users/${userId}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch user profile');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        throw error;
+    }
+};
+
+// Get user assets
+export const fetchUserAssets = async (userId: string) => {
+    try {
+        const response = await fetch(`http://43.207.147.137:3001/api/users/${userId}/assets`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch user assets');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching user assets:', error);
+        throw error;
+    }
+};
+
+// Get user preferences
+export const fetchUserPreferences = async (userId: string) => {
+    try {
+        const response = await fetch(`http://43.207.147.137:3001/api/users/${userId}/preferences`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch user preferences');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching user preferences:', error);
         throw error;
     }
 };

@@ -92,28 +92,28 @@ export const Discover = () => {
     const { data: potentialMatches = [], isLoading: isLoadingPotentialMatches, refetch } = useQuery({
         queryKey: ['potentialMatches'],
         queryFn: () => fetchPotentialMatches(),
-        enabled: !!userId && view === 'discover'
+        enabled: !!userId && view === 'discover' && connected
     });
 
     // Get matched users
     const { data: matches = [], isLoading: isLoadingMatches } = useQuery({
         queryKey: ['matches'],
         queryFn: () => getUserMatches(),
-        enabled: !!userId && view === 'matches'
+        enabled: !!userId && view === 'matches' && connected
     });
 
     // Add query to get friends list
     const { data: friends = [], isLoading: isLoadingFriends } = useQuery({
         queryKey: ['friends', walletAddress],
         queryFn: () => getUserFriends(walletAddress || ''),
-        enabled: !!walletAddress && view === 'matches' && activeTab === 'friends'
+        enabled: !!walletAddress && view === 'matches' && activeTab === 'friends' && connected
     });
 
     // Add query to get user's NFTs
     const { data: userNFTs = [], isLoading: isLoadingNFTs } = useQuery({
         queryKey: ['userNFTs', walletAddress],
         queryFn: () => getWalletNFTs(walletAddress || ''),
-        enabled: !!walletAddress && view === 'nft'
+        enabled: !!walletAddress && view === 'nft' && connected
     });
 
     const handleScan = () => {

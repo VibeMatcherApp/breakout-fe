@@ -11,6 +11,23 @@ import { toSolanaWalletConnectors } from "@privy-io/react-auth/solana";
 
 const queryClient = new QueryClient();
 
+const solanaChain = {
+  id: 101,
+  name: "Solana",
+  rpcUrls: {
+    default: { http: ["https://api.mainnet-beta.solana.com"] },
+    public: { http: ["https://api.mainnet-beta.solana.com"] },
+  },
+  blockExplorers: {
+    default: { name: "Solana Explorer", url: "https://explorer.solana.com" },
+  },
+  nativeCurrency: {
+    name: "SOL",
+    symbol: "SOL",
+    decimals: 9,
+  },
+} as const;
+
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <PrivyProvider
@@ -19,15 +36,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
       config={{
         loginMethods: ["wallet", "email", "twitter"],
         appearance: {
-          walletChainType: "solana-olny",
+          walletChainType: "solana-only",
           walletList: ["phantom"],
           theme: "dark",
         },
         embeddedWallets: {
-          solana: {
-            createOnLogin: "users-without-wallets",
-          },
+          createOnLogin: "users-without-wallets",
         },
+        supportedChains: [solanaChain],
+        defaultChain: solanaChain,
         externalWallets: {
           solana: {
             connectors: toSolanaWalletConnectors(),
