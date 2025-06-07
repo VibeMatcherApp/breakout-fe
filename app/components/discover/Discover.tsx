@@ -21,6 +21,7 @@ import { walletConnect } from '@/lib/wallet';
 import { ethers } from 'ethers';
 import { Input } from '@/components/ui/input';
 import { getRizzContract, RIZZ_CONTRACT_ADDRESS } from '@/lib/contracts/RizzToken';
+import { usePrivy } from '@privy-io/react-auth';
 
 interface PotentialMatch {
     user: {
@@ -65,6 +66,7 @@ export const RIZZ_ABI = [
 ];
 
 export const Discover = () => {
+    const { user } = usePrivy();
     const { userId, login, logout } = useAuth();
     const { walletAddress, connected } = useWallet();
     const { showToast } = useToast();
@@ -329,204 +331,204 @@ export const Discover = () => {
     };
 
     // Send tip to friend's wallet
-    const handleTipSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsSendingTip(true);
-        setTipError(null);
-        setTransactionStatus("Sending tip...");
+    // const handleTipSubmit = async (e: React.FormEvent) => {
+    //     e.preventDefault();
+    //     setIsSendingTip(true);
+    //     setTipError(null);
+    //     setTransactionStatus("Sending tip...");
 
-        try {
-            if (!viewingFriendProfile) {
-                throw new Error("Friend data missing");
-            }
+    //     try {
+    //         if (!viewingFriendProfile) {
+    //             throw new Error("Friend data missing");
+    //         }
 
-            const recipientAddress = viewingFriendProfile.wallet_address;
-            if (!recipientAddress) {
-                throw new Error("Friend wallet address missing");
-            }
+    //         const recipientAddress = viewingFriendProfile.wallet_address;
+    //         if (!recipientAddress) {
+    //             throw new Error("Friend wallet address missing");
+    //         }
 
-            // Connect to provider
-            const provider = await walletConnect();
-            if (!provider) {
-                throw new Error("Unable to connect to wallet");
-            }
+    //         // Connect to provider
+    //         const provider = await walletConnect();
+    //         if (!provider) {
+    //             throw new Error("Unable to connect to wallet");
+    //         }
 
-            // Get RIZZ token contract
-            const rizzContract = getRizzContract(provider);
+    //         // Get RIZZ token contract
+    //         const rizzContract = getRizzContract(provider);
 
-            // Check if user is registered
-            const signer = provider.getSigner();
-            const userAddress = await signer.getAddress();
-            const isRegistered = await rizzContract.isRegistered(userAddress);
+    //         // Check if user is registered
+    //         const signer = provider.getSigner();
+    //         const userAddress = await signer.getAddress();
+    //         const isRegistered = await rizzContract.isRegistered(userAddress);
 
-            // If user is not registered, don't auto-register, prompt user to register first
-            if (!isRegistered) {
-                throw new Error("Please register your account first to receive RIZZ tokens");
-            }
+    //         // If user is not registered, don't auto-register, prompt user to register first
+    //         if (!isRegistered) {
+    //             throw new Error("Please register your account first to receive RIZZ tokens");
+    //         }
 
-            // Check balance
-            const balance = await rizzContract.balanceOf(userAddress);
-            const tipAmountWei = ethers.utils.parseEther(tipAmount);
+    //         // Check balance
+    //         const balance = await rizzContract.balanceOf(userAddress);
+    //         const tipAmountWei = ethers.utils.parseEther(tipAmount);
 
-            if (balance.lt(tipAmountWei)) {
-                throw new Error(`Not enough RIZZ tokens. You have ${ethers.utils.formatEther(balance)} RIZZ`);
-            }
+    //         if (balance.lt(tipAmountWei)) {
+    //             throw new Error(`Not enough RIZZ tokens. You have ${ethers.utils.formatEther(balance)} RIZZ`);
+    //         }
 
-            // Send RIZZ tokens
-            const tx = await rizzContract.transfer(recipientAddress, tipAmountWei);
+    //         // Send RIZZ tokens
+    //         const tx = await rizzContract.transfer(recipientAddress, tipAmountWei);
 
-            // Wait for transaction confirmation
-            await tx.wait();
+    //         // Wait for transaction confirmation
+    //         await tx.wait();
 
-            showToast(
-                "Tip sent successfully",
-                `You have successfully sent ${tipAmount} RIZZ tokens`,
-                "default"
-            );
+    //         showToast(
+    //             "Tip sent successfully",
+    //             `You have successfully sent ${tipAmount} RIZZ tokens`,
+    //             "default"
+    //         );
 
-            setViewingFriendProfile(null);
-        } catch (error: any) {
-            console.error('Error sending RIZZ tip:', error);
+    //         setViewingFriendProfile(null);
+    //     } catch (error: any) {
+    //         console.error('Error sending RIZZ tip:', error);
 
-            // Check if error is user rejected transaction
-            if (error.code === 'ACTION_REJECTED') {
-                setIsSendingTip(false);
-                return;
-            }
+    //         // Check if error is user rejected transaction
+    //         if (error.code === 'ACTION_REJECTED') {
+    //             setIsSendingTip(false);
+    //             return;
+    //         }
 
-            // Check if error is ENS related
-            if (error.message.includes('network does not support ENS') ||
-                error.message.includes('UNSUPPORTED_OPERATION')) {
-                setTipError("Please switch to Polygon network in your wallet");
-                showToast(
-                    "Network Error",
-                    "Please switch to Polygon network in your wallet",
-                    "destructive"
-                );
-                setIsSendingTip(false);
-                return;
-            }
+    //         // Check if error is ENS related
+    //         if (error.message.includes('network does not support ENS') ||
+    //             error.message.includes('UNSUPPORTED_OPERATION')) {
+    //             setTipError("Please switch to Polygon network in your wallet");
+    //             showToast(
+    //                 "Network Error",
+    //                 "Please switch to Polygon network in your wallet",
+    //                 "destructive"
+    //             );
+    //             setIsSendingTip(false);
+    //             return;
+    //         }
 
-            // Set error message
-            setTipError(error.message || "Failed to send tip, please try again");
+    //         // Set error message
+    //         setTipError(error.message || "Failed to send tip, please try again");
 
-            showToast(
-                "Tip sending failed",
-                error.message || "Transaction couldn't complete, please try again later",
-                "destructive"
-            );
-        } finally {
-            setIsSendingTip(false);
-        }
-    };
+    //         showToast(
+    //             "Tip sending failed",
+    //             error.message || "Transaction couldn't complete, please try again later",
+    //             "destructive"
+    //         );
+    //     } finally {
+    //         setIsSendingTip(false);
+    //     }
+    // };
 
-    useEffect(() => {
-        if (viewingFriendProfile && walletAddress) {
-            const fetchRizzBalance = async () => {
-                try {
-                    const provider = await walletConnect();
-                    if (provider) {
-                        const rizzContract = getRizzContract(provider);
-                        const balance = await rizzContract.balanceOf(walletAddress);
-                        setRizzBalance(ethers.utils.formatEther(balance));
-                    }
-                } catch (error) {
-                    console.error("Error fetching RIZZ balance:", error);
-                    setRizzBalance("Error");
-                }
-            };
+    // useEffect(() => {
+    //     if (viewingFriendProfile && walletAddress) {
+    //         const fetchRizzBalance = async () => {
+    //             try {
+    //                 const provider = await walletConnect();
+    //                 if (provider) {
+    //                     const rizzContract = getRizzContract(provider);
+    //                     const balance = await rizzContract.balanceOf(walletAddress);
+    //                     setRizzBalance(ethers.utils.formatEther(balance));
+    //                 }
+    //             } catch (error) {
+    //                 console.error("Error fetching RIZZ balance:", error);
+    //                 setRizzBalance("Error");
+    //             }
+    //         };
 
-            fetchRizzBalance();
-        }
-    }, [viewingFriendProfile, walletAddress]);
+    //         fetchRizzBalance();
+    //     }
+    // }, [viewingFriendProfile, walletAddress]);
 
     // Execute after user connects wallet
-    const checkAndRegisterUser = async () => {
-        try {
-            const provider = await walletConnect();
-            const rizzContract = getRizzContract(provider);
-            const signer = provider.getSigner();
-            const userAddress = await signer.getAddress();
+    // const checkAndRegisterUser = async () => {
+    //     try {
+    //         const provider = await walletConnect();
+    //         const rizzContract = getRizzContract(provider);
+    //         const signer = provider.getSigner();
+    //         const userAddress = await signer.getAddress();
 
-            // Check if registered
-            const isRegistered = await rizzContract.isRegistered(userAddress);
+    //         // Check if registered
+    //         const isRegistered = await rizzContract.isRegistered(userAddress);
 
-            if (!isRegistered) {
-                setIsRegistering(true);
-                showToast(
-                    "Registering",
-                    "Setting up your account to receive 5 RIZZ tokens...",
-                    "default"
-                );
+    //         if (!isRegistered) {
+    //             setIsRegistering(true);
+    //             showToast(
+    //                 "Registering",
+    //                 "Setting up your account to receive 5 RIZZ tokens...",
+    //                 "default"
+    //             );
 
-                try {
-                    const registerTx = await rizzContract.register();
-                    await registerTx.wait();
+    //             try {
+    //                 const registerTx = await rizzContract.register();
+    //                 await registerTx.wait();
 
-                    showToast(
-                        "Registration successful",
-                        "You've received 5 RIZZ tokens as a welcome bonus!",
-                        "default"
-                    );
+    //                 showToast(
+    //                     "Registration successful",
+    //                     "You've received 5 RIZZ tokens as a welcome bonus!",
+    //                     "default"
+    //                 );
 
-                    // Update user state
-                    setIsRegistered(true);
-                    // Get and update balance
-                    const balance = await rizzContract.balanceOf(userAddress);
-                    setRizzBalance(ethers.utils.formatEther(balance));
-                } catch (regError) {
-                    console.error("Registration failed:", regError);
-                    showToast(
-                        "Registration failed",
-                        "Could not register your account. Please try again.",
-                        "destructive"
-                    );
-                } finally {
-                    setIsRegistering(false);
-                }
-            } else {
-                // Already registered, just update balance
-                const balance = await rizzContract.balanceOf(userAddress);
-                setRizzBalance(ethers.utils.formatEther(balance));
-                setIsRegistered(true);
-            }
-        } catch (error) {
-            console.error("Error checking registration:", error);
-            showToast(
-                "Error",
-                "Could not connect to the blockchain",
-                "destructive"
-            );
-        }
-    };
+    //                 // Update user state
+    //                 setIsRegistered(true);
+    //                 // Get and update balance
+    //                 const balance = await rizzContract.balanceOf(userAddress);
+    //                 setRizzBalance(ethers.utils.formatEther(balance));
+    //             } catch (regError) {
+    //                 console.error("Registration failed:", regError);
+    //                 showToast(
+    //                     "Registration failed",
+    //                     "Could not register your account. Please try again.",
+    //                     "destructive"
+    //                 );
+    //             } finally {
+    //                 setIsRegistering(false);
+    //             }
+    //         } else {
+    //             // Already registered, just update balance
+    //             const balance = await rizzContract.balanceOf(userAddress);
+    //             setRizzBalance(ethers.utils.formatEther(balance));
+    //             setIsRegistered(true);
+    //         }
+    //     } catch (error) {
+    //         console.error("Error checking registration:", error);
+    //         showToast(
+    //             "Error",
+    //             "Could not connect to the blockchain",
+    //             "destructive"
+    //         );
+    //     }
+    // };
 
-    const testContractConnection = async () => {
-        try {
-            // Connect to provider
-            const provider = await walletConnect();
-            console.log("Provider connected, network:", await provider.getNetwork());
+    // const testContractConnection = async () => {
+    //     try {
+    //         // Connect to provider
+    //         const provider = await walletConnect();
+    //         console.log("Provider connected, network:", await provider.getNetwork());
 
-            // Create contract instance
-            const rizzContract = new ethers.Contract(
-                RIZZ_CONTRACT_ADDRESS,
-                ["function name() view returns (string)"],
-                provider
-            );
+    //         // Create contract instance
+    //         const rizzContract = new ethers.Contract(
+    //             RIZZ_CONTRACT_ADDRESS,
+    //             ["function name() view returns (string)"],
+    //             provider
+    //         );
 
-            // Try calling simplest function - name()
-            console.log("Testing contract name()...");
-            const name = await rizzContract.name();
-            console.log("Contract name:", name);
+    //         // Try calling simplest function - name()
+    //         console.log("Testing contract name()...");
+    //         const name = await rizzContract.name();
+    //         console.log("Contract name:", name);
 
-            return "Contract connection successful";
-        } catch (error) {
-            console.error("Contract test failed:", error);
-            return "Contract connection failed: " + (error instanceof Error ? error.message : "Unknown error");
-        }
-    };
+    //         return "Contract connection successful";
+    //     } catch (error) {
+    //         console.error("Contract test failed:", error);
+    //         return "Contract connection failed: " + (error instanceof Error ? error.message : "Unknown error");
+    //     }
+    // };
 
     // Call and display result
-    testContractConnection().then(console.log);
+    // testContractConnection().then(console.log);
 
     const resetMatches = () => {
         localStorage.removeItem('savedMatches');
@@ -598,7 +600,7 @@ export const Discover = () => {
 
                                         <Button 
                                             className="w-full bg-purple hover:bg-purple/90"
-                                            onClick={handleTipSubmit}
+                                            // onClick={handleTipSubmit}
                                             disabled={isSendingTip || !viewingFriendProfile.wallet_address}
                                         >
                                             {isSendingTip ? (

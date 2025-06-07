@@ -43,17 +43,17 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         }
     }, [ready, authenticated, user]);
 
-    const connect = async () => {
-        try {
-            // Here should implement actual wallet connection logic
-            // For example using ethers.js or web3.js
-            setConnected(true);
-            setWalletAddress('0x123...'); // Example address
-        } catch (error) {
-            console.error('Failed to connect wallet:', error);
-            throw error;
-        }
-    };
+    // const connect = async () => {
+    //     try {
+    //         // Here should implement actual wallet connection logic
+    //         // For example using ethers.js or web3.js
+    //         setConnected(true);
+    //         setWalletAddress('0x123...'); // Example address
+    //     } catch (error) {
+    //         console.error('Failed to connect wallet:', error);
+    //         throw error;
+    //     }
+    // };
 
     const disconnect = () => {
         setConnected(false);

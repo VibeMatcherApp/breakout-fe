@@ -28,7 +28,6 @@ export function WalletGatekeeper({ children }: WalletGatekeeperProps) {
 
   const walletAddress = wallets?.[0]?.address;
 
-  // 初始化检查
   useEffect(() => {
     if (ready && !hasInitialized) {
       const hasLoggedIn = localStorage.getItem('hasLoggedIn') === 'true';
